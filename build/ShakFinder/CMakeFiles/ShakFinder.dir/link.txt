@@ -1,1 +1,0 @@
-/usr/bin/g++  -march=native -g CMakeFiles/ShakFinder.dir/ShakFinder.cpp.o CMakeFiles/ShakFinder.dir/Engine/Game.cpp.o CMakeFiles/ShakFinder.dir/Engine/Piece.cpp.o CMakeFiles/ShakFinder.dir/Engine/Parser.cpp.o CMakeFiles/ShakFinder.dir/Engine/Solver.cpp.o -o ShakFinder 
