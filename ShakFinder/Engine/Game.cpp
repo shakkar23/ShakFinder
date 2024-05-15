@@ -35,7 +35,7 @@ void Game::do_hold() {
     }
 }
 
-bool Game::place_piece(Piece& piece) {
+bool Game::place_piece(const Piece& piece) {
     bool first_hold = false;
     if (piece.type != current_piece.type) {
         if (!hold.has_value())
@@ -67,7 +67,6 @@ bool Game::collides(const Board& board, const Piece& piece) const {
         if (board.get(x_pos, y_pos))
             return true;
     }
-
     return false;
 }
 
@@ -142,7 +141,7 @@ void Game::shift(Piece& piece, int dir) const {
         piece.spin = Spin::null;
 }
 
-void Game::sonic_drop(const Board board, Piece& piece) const {
+void Game::sonic_drop(const Board &board, Piece& piece) const {
     int distance = 32;
     for (auto& mino : piece.minos) {
 
@@ -300,7 +299,7 @@ std::vector<Piece> Game::movegen(PieceType piece_type) const {
     std::vector<bool> visited = std::vector<bool>(6444);
 
     std::vector<Piece> valid_moves;
-    valid_moves.reserve(100);
+    valid_moves.reserve(150);
 
     // root node
     open_nodes.emplace_back(initial_piece);
@@ -359,7 +358,7 @@ std::vector<Piece> Game::get_possible_piece_placements() const {
 
     std::vector<Piece> valid_pieces = movegen(current_piece.type);
 
-    PieceType holdType = hold.has_value() ? hold->type : queue.front();
+    const PieceType &holdType = hold.has_value() ? hold->type : queue.front();
     if (holdType != PieceType::Empty && holdType != current_piece.type) {
         std::vector<Piece> hold_pieces = movegen(holdType);
         valid_pieces.reserve(valid_pieces.size() + hold_pieces.size());

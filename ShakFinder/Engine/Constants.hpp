@@ -4,10 +4,11 @@
 #include <cstdint>
 #include <vector>
 
-typedef uint8_t u8;    ///<   8-bit unsigned integer.
-typedef uint16_t u16;  ///<  16-bit unsigned integer.
-typedef uint32_t u32;  ///<  32-bit unsigned integer.
-typedef uint64_t u64;  ///<  64-bit unsigned integer.
+using u8 = uint8_t;    ///<   8-bit unsigned integer.
+using s8 = int8_t;     ///<   8-bit signed integer.
+using u16 = uint16_t;  ///<  16-bit unsigned integer.
+using u32 = uint32_t;  ///<  32-bit unsigned integer.
+using u64 = uint64_t;  ///<  64-bit unsigned integer.
 
 enum class Spin : u8 {
     null,
@@ -15,8 +16,8 @@ enum class Spin : u8 {
     normal,
 };
 struct Coord {
-    int8_t x;
-    int8_t y;
+    s8 x;
+    s8 y;
 };
 
 struct Piece_Stats {

@@ -6,7 +6,7 @@
 
 class Piece {
    public:
-    Piece(PieceType type) {
+    constexpr Piece(PieceType type) {
         this->type = type;
         rotation = RotationDirection::North;
         position = {10 / 2 - 1, 20 - 2};
@@ -14,20 +14,17 @@ class Piece {
         spin = Spin::null;
     }
 
-    static constexpr std::vector<std::array<Coord, 4>> minoLUT() {
-        std::vector<std::array<Coord, 4>> table = {};
-        // how tf to iterate an enum
-        for (int t = 0; t < (int) PieceType::PieceTypes_N; ++t) {
-            for (int r = 0; r < 4; ++r) {
-                Piece piece = Piece((PieceType) t);
-                for (int i = 0; i < r; i++) {
-                    piece.calculate_rotate(Right);
-                }
-                table.push_back(piece.minos);
-            }
-        }
-        return table;
-    }
+	constexpr Piece(PieceType type, Coord position, RotationDirection rotation) {
+		this->type = type;
+		this->position = position;
+		this->rotation = rotation;
+		minos = piece_definitions[static_cast<size_t>(type)];
+		// rotate the piece to the correct orientation
+		for (int i = 0; i < static_cast<int>(rotation); i++) {
+			calculate_rotate(Right);
+		}
+		spin = Spin::null;
+	}
 
     Piece() = delete;
     Piece(const Piece& other) = default;

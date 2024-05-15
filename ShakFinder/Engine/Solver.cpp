@@ -183,37 +183,45 @@ bool can_pc(const Board& board, const Queue& queue) {
     for (size_t i = 1; i < QUEUE_SIZE && i < queue.size(); i++) {
         game.queue[i - 1] = queue[i + 1];
     }
-    std::vector<Piece> ppp = game.get_possible_piece_placements();
+    const std::vector<Piece> ppp = game.get_possible_piece_placements();
 
-    int max_lines = 4;
+    const int max_lines = 4;
 
-    std::atomic_bool solved = false;
+    std::atomic_bool atomic_solved = false;
 
     std::vector<std::jthread> threads(ppp.size());
     std::vector<u8> return_values(ppp.size());
 
     int i = 0;
     for (auto& pp : ppp) {
-        threads[i] = std::jthread([game, queue, pp, &solved, max_lines, &return_value = return_values[i]]() {
+        threads[i] = std::jthread([game, queue, pp, &atomic_solved, max_lines, &return_value = return_values[i]]() {
             Game new_game = game;
             Piece p = pp;
-            bool held_first = new_game.place_piece(p);
+            bool first_hold = new_game.place_piece(p);
             int lines_cleared = new_game.board.clearLines();
 
             if (lines_cleared == max_lines) {
-                solved = true;
+                atomic_solved = true;
                 return_value = true;
                 return;
             }
-            int pieces_used = 0;
+            int pieces_used = 1;
 
-            if (held_first) {
+            if (first_hold) {
                 pieces_used++;
             }
+
             std::vector<Piece> path{};
-            bool solved2 = can_pc_recurse({.game = new_game, .queue = queue, .path = path, .pieces_used = pieces_used, .cleared_lines = lines_cleared, .max_lines = max_lines}, solved);
-            if (solved2) {
-                solved = true;
+            bool local_solved = can_pc_recurse({
+                .game = new_game,
+                .queue = queue,
+                .path = path,
+                .pieces_used = pieces_used,
+                .cleared_lines = lines_cleared,
+                .max_lines = max_lines }, atomic_solved);
+
+            if (local_solved) {
+                atomic_solved = true;
                 return_value = true;
             }
             return;
@@ -249,7 +257,7 @@ struct solve_pcs_state {
     const int max_lines;
 };
 
-void solve_pcs_recurse(const solve_pcs_state& state) {
+static void solve_pcs_recurse(const solve_pcs_state& state) {
     // warning with returning out of this function, it means that we are skipping every other piece placement
 
     Game game = state.game;
@@ -265,7 +273,8 @@ void solve_pcs_recurse(const solve_pcs_state& state) {
     bool T_should_be_vertical = false;
     bool T_should_be_horizontal = false;
 
-    {  // columnar parity checking
+    // columnar parity checking
+    {  
         u32 empty_cells = game.board.empty_cells(state.max_lines - state.cleared_lines);
         // this only works because we constrain the queue to be
         // exactly the number of pieces that fills the max_pc
@@ -393,8 +402,10 @@ void solve_pcs_recurse(const solve_pcs_state& state) {
         }
 
         if (new_game.board.has_imbalanced_split(lines_left))
+        {
             // bad piece placement, it makes an imbalanced split
             continue;
+        }
 
         if (T_should_be_horizontal && pp.type == PieceType::T) {
             if (pp.rotation == RotationDirection::North || pp.rotation == RotationDirection::South) {
@@ -430,11 +441,10 @@ std::vector<std::vector<Piece>> solve_pcs(const Board& board, const Queue& queue
     Game game;
     game.current_piece = queue[0];
 
-    for (size_t i = 1; i < QUEUE_SIZE && i < queue.size(); i++) {
-        game.queue[i - 1] = queue[i + 1];
+    for (size_t i = 1; i < (QUEUE_SIZE + 1) && i < queue.size(); i++) {
+        game.queue[i - 1] = queue[i];
     }
     std::vector<Piece> ppp = game.get_possible_piece_placements();
-
     int max_lines = 4;
 
     std::atomic_bool solved = false;
@@ -444,10 +454,9 @@ std::vector<std::vector<Piece>> solve_pcs(const Board& board, const Queue& queue
 
     int i = 0;
     for (auto& pp : ppp) {
-        [game, queue, pp, &solved, max_lines, &return_value = return_values[i]]() {
+        threads[i] = std::jthread([game, queue, pp, &solved, max_lines, &return_value = return_values[i]]() {
             Game new_game = game;
-            Piece p = pp;
-            bool held_first = new_game.place_piece(p);
+            bool held_first = new_game.place_piece(pp);
             int lines_cleared = new_game.board.clearLines();
 
             if (lines_cleared == max_lines) {
@@ -470,17 +479,17 @@ std::vector<std::vector<Piece>> solve_pcs(const Board& board, const Queue& queue
                  .cleared_lines = lines_cleared,
                  .max_lines = max_lines});
             return;
-        }();
+        });
 
         ++i;
     }
 
     for (auto& thread : threads) {
-        // thread.join();
+        thread.join();
     }
 
-    for (auto return_value : return_values) {
-        for (auto solution : return_value) {
+    for (const auto& return_value : return_values) {
+        for (const auto &solution : return_value) {
             solutions.push_back(solution);
         }
     }

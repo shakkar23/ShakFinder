@@ -12,7 +12,10 @@ class Board {
     static constexpr size_t width = 10;
     static constexpr size_t visual_height = 20;
     static constexpr size_t height = 32;
-    Board() {
+
+    using column_t = u32;
+
+    constexpr Board() {
         board.fill(0);
     }
 
@@ -23,23 +26,23 @@ class Board {
     Board(Board&& other) noexcept = default;
     Board& operator=(const Board& other) = default;
 
-    int get(size_t x, size_t y) const {
+    constexpr int get(size_t x, size_t y) const {
         return (board[x] & (1 << y)) != 0;
     }
 
-    uint32_t get_column(size_t x) const {
+    constexpr column_t get_column(size_t x) const {
         return board[x];
     }
 
-    void set(size_t x, size_t y) {
+    constexpr void set(size_t x, size_t y) {
         board[x] |= (1 << y);
     }
 
-    void unset(size_t x, size_t y) {
+    constexpr void unset(size_t x, size_t y) {
         board[x] &= ~(1 << y);
     }
 
-    void set(const Piece& piece) {
+    constexpr void set(const Piece& piece) {
         for (const Coord& mino : piece.minos) {
             set(
                 (size_t)mino.x + piece.position.x,
@@ -47,7 +50,7 @@ class Board {
         }
     }
 
-	void unset(const Piece& piece) {
+    constexpr void unset(const Piece& piece) {
 		for (const Coord& mino : piece.minos) {
 			unset(
 				(size_t)mino.x + piece.position.x,
@@ -55,42 +58,42 @@ class Board {
 		}
 	}
 
-    int clearLines() {
-        uint32_t mask = UINT32_MAX;
-        for (uint32_t& column : board)
+    constexpr int clearLines() {
+        column_t mask = std::numeric_limits<column_t>::max();
+        for (column_t& column : board)
             mask &= column;
         int lines_cleared = std::popcount(mask);
         mask = ~mask;
 
-        for (uint32_t& column : board)
+        for (column_t& column : board)
             column = pext(column, mask);
 
         return lines_cleared;
     }
 
-    int filledRows() const {
-        uint32_t mask = UINT32_MAX;
-        for (const uint32_t& column : board)
+    constexpr int filledRows() const {
+        column_t mask = std::numeric_limits<column_t>::max();
+        for (const column_t& column : board)
             mask &= column;
 
         return std::popcount(mask);
     }
 
-	bool is_empty() const {
+    constexpr bool is_empty() const {
 		bool ret = true;
-		for (const uint32_t& column : board) {
+		for (const column_t& column : board) {
 			if (column != 0) {
 				ret = false;
 			}
 		}
-		return true;
+		return ret;
 	}
 
-    u32 bounded(int height) const {
+    constexpr u32 bounded(int height) const {
 		Board left_bounded = *this;
 		Board right_bounded = *this;
-
-		u32 last_column = UINT32_MAX;
+        
+        column_t last_column = std::numeric_limits<column_t>::max();
 		for (size_t i = 0; i < Board::width; i++) {
             std::swap(left_bounded.board[i], last_column);
         }
@@ -123,8 +126,8 @@ class Board {
 		return bounded_board;
     }
 
-    u32 not_empty(int height) const {
-        u32 not_empty_board = 0;
+    constexpr u32 not_empty(int height) const {
+        column_t not_empty_board = 0;
 
 		// if the column has a value that isnt 0, then we set the bit to 1
         for (size_t i = 0; i < Board::width; i++) {
@@ -134,7 +137,7 @@ class Board {
 		return not_empty_board;
     }
 
-    u32 full(int height) const {
+    constexpr u32 full(int height) const {
         u32 full_board = 0;
 
 		// if the mask is the same as the height, then the column meets the requirements
@@ -145,7 +148,7 @@ class Board {
 		return full_board;
     }
 
-    bool has_imbalanced_split(int height) const {
+    constexpr bool has_imbalanced_split(int height) const {
         u32 full_cols = full(height);
 
 		for (int i = 1; i < Board::width - 1; i++) {
@@ -167,7 +170,7 @@ class Board {
 		return false;
     }
 
-    u32 empty_cells(int height) const  {
+    constexpr u32 empty_cells(int height) const  {
         u32 acc{};
 
 		for (size_t j = 0; j < Board::width; ++j)
@@ -176,5 +179,5 @@ class Board {
 		return acc;
     }
 
-    std::array<uint32_t, Board::width> board;
+    std::array<column_t, Board::width> board;
 };

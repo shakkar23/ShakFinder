@@ -34,7 +34,7 @@ class Game {
     void place_piece();
 
     // returns if the first held was triggered
-    bool place_piece(Piece& piece);
+    bool place_piece(const Piece& piece);
 
     void do_hold();
 
@@ -44,7 +44,7 @@ class Game {
 
     void shift(Piece& piece, int dir) const;
 
-    void sonic_drop(const Board board, Piece& piece) const;
+    void sonic_drop(const Board& board, Piece& piece) const;
 
     void add_garbage(int lines, int location);
 
@@ -65,9 +65,9 @@ class Game {
     Board board;
     Piece current_piece;
     std::optional<Piece> hold;
+    std::array<PieceType, QUEUE_SIZE> queue;
     int garbage_meter = 0;
 
     JstrisStats stats;
 
-    std::array<PieceType, QUEUE_SIZE> queue;
 };

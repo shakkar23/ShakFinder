@@ -1,21 +1,7 @@
 #include "Piece.hpp"
 
 void Piece::rotate(TurnDirection direction) {
-
     return calculate_rotate(direction);
-
-    int shift;
-
-    if (direction == TurnDirection::Left) {
-        shift = 3;
-    }
-    else {
-        shift = 1;
-    }
-
-    rotation = static_cast<RotationDirection>((static_cast<int>(rotation) + shift) % 4);
-
-    minos = minoLUT()[(int)type * 4 + rotation];
 }
 
 void Piece::calculate_rotate(TurnDirection direction) {
@@ -37,7 +23,7 @@ void Piece::calculate_rotate(TurnDirection direction) {
 }
 
 uint32_t Piece::hash() const {
-    return ((int)type << 24) | (position.x << 16) | (position.y << 8) | (rotation);
+    return ((uint32_t)type << 24) | (position.x << 16) | (position.y << 8) | (rotation);
 }
 
 uint32_t Piece::compact_hash() const {
