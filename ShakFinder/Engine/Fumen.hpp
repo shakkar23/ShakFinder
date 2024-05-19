@@ -144,11 +144,11 @@ namespace Fumen {
 					}();
 
 					// make generator that just gets the next value
-					auto iter_next = [&vec] () mutable -> std::optional<u8> {
+					auto iter_next = [&vec] () mutable {
 						auto& val = *vec.begin();
 						// iterate iter
 						vec.erase(vec.begin());
-						return val;
+						return *val;
 					};
 
 					Fumen fumen;
@@ -163,7 +163,7 @@ namespace Fumen {
 							int y = 0;
 
 							while (y != 24) {
-								const int number = *iter_next() + 64 * *iter_next();
+								const int number = iter_next() + 64 * (iter_next());
 								const int value = number / 240;
 								const int repeats = number % 240 + 1;
 
@@ -217,7 +217,7 @@ namespace Fumen {
 
 						// decode page data
 
-						int number = (int)iter_next().value() + 64 * (int)iter_next().value() + (int)iter_next().value() * 64 * 64;
+						int number = (int)iter_next() + 64 * (int)iter_next() + (int)iter_next() * 64 * 64;
 						const int piece_type = number % 8;
 						const int piece_rotation = number / 8 % 4;
 						const unsigned int piece_pos = number / 32 % 240;
@@ -329,12 +329,12 @@ namespace Fumen {
 						page.lock = (flags & 0b10000) != 0;
 
 						if (comment) {
-							size_t length = (size_t)iter_next().value() + (size_t)iter_next().value() * 64;
+							size_t length = (size_t)iter_next() + (size_t)iter_next() * 64;
 							std::wstring escaped;
 							while (length > 0) {
-								int comment_number = (int)iter_next().value() + (int)iter_next().value() * 64 + int(iter_next().value()) * 64 * 64 +
-									int(iter_next().value()) * 64 * 64 * 64 + int(iter_next().value()) * 64 * 64 * 64 * 64;
-								for (int i = 0; i < std::min(length, 4ull); ++i) {
+								int comment_number = (int)iter_next() + (int)iter_next() * 64 + int(iter_next()) * 64 * 64 +
+									int(iter_next()) * 64 * 64 * 64 + int(iter_next()) * 64 * 64 * 64 * 64;
+								for (int i = 0; i < std::min(length, (size_t)4); ++i) {
 									escaped.push_back(number % 96 + 0x20);
 									length -= 1;
 									number /= 96;
@@ -354,6 +354,8 @@ namespace Fumen {
 			catch (...) {
 				return std::nullopt;
 			}
+			// unreachable
+			return std::nullopt;
 		}
 
 		Board to_board(const FumenBoard& fumen_board) {
