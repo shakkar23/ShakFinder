@@ -20,13 +20,6 @@ struct Coord {
     s8 y;
 };
 
-struct Piece_Stats {
-    // per piece basis
-    const int linesCleared;
-    const Spin spin;
-    const bool pc;
-};
-
 enum RotationDirection : u8 {
     North,
     East,

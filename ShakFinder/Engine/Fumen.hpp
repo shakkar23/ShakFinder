@@ -69,9 +69,17 @@ namespace Fumen {
 
 		std::string comment;
 
+		inline void print_field() {
+			for (size_t y = 0; y < 23; ++y) {
+				for (size_t x = 0; x < 10; ++x) {
+					std::cout << field.at(22 - y).at(x);
+				}
+				std::cout << std::endl;
+			}
+		}
 	};
 
-	static inline std::string js_escape(std::wstring& str) {
+	inline std::string js_escape(std::wstring& str) {
 		const std::array<u8, 16> HEX_DIGITS = {
 			'0', '1', '2', '3', '4', '5', '6', '7',
 			'8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
@@ -119,7 +127,7 @@ namespace Fumen {
 	};
 
 	// pretty much taken directly from https://github.com/MinusKelvin/fumen-rs/blob/3c361f2df8cc2d40bff74e51ab38ffe8ee327cb4/src/lib.rs#L172
-	static constexpr std::optional<Fumen> parse(const std::string str) {
+	constexpr std::optional<Fumen> parse(const std::string str) {
 			try {
 				// if the beginning of the string isnt v115@, return an empty board
 				if (str.substr(0, 5) != "v115@") {
@@ -134,10 +142,12 @@ namespace Fumen {
 						auto range = std::ranges::filter_view(sub_str, [](char c) { return c != '?'; }) |
 							std::views::transform([](char c) -> std::optional<u8> { return from_base64(c); });
 
-						std::vector<std::optional<u8>> vec;
+						std::vector<u8> vec;
 						
 						for (auto c : range) {
-							vec.push_back(c);
+							if (c.has_value()) {
+								vec.push_back(*c);
+							}
 						}
 
 						return vec;
@@ -145,10 +155,10 @@ namespace Fumen {
 
 					// make generator that just gets the next value
 					auto iter_next = [&vec] () mutable {
-						auto& val = *vec.begin();
+						auto val = *vec.begin();
 						// iterate iter
 						vec.erase(vec.begin());
-						return *val;
+						return val;
 					};
 
 					Fumen fumen;
@@ -163,7 +173,7 @@ namespace Fumen {
 							int y = 0;
 
 							while (y != 24) {
-								const int number = iter_next() + 64 * (iter_next());
+								const int number = static_cast<int>(iter_next())  + 64 * static_cast<int>(iter_next());
 								const int value = number / 240;
 								const int repeats = number % 240 + 1;
 
@@ -358,7 +368,7 @@ namespace Fumen {
 			return std::nullopt;
 		}
 
-		Board to_board(const FumenBoard& fumen_board) {
+		inline Board to_board(const FumenBoard& fumen_board) {
 			Board board;
 			
 			for (size_t y = 0; y < 23; ++y)

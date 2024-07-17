@@ -4,6 +4,7 @@
 #include <optional>
 #include <ranges>
 #include <vector>
+#include <variant>
 
 #include "Board.hpp"
 #include "Piece.hpp"
@@ -11,7 +12,7 @@
 #include "GameRules/tetrio.hpp"
 #include "GameRules/jstris_score.hpp"
 
-constexpr int QUEUE_SIZE = 6;
+constexpr size_t QUEUE_SIZE = 6;
 
 class Game {
    public:
@@ -25,7 +26,7 @@ class Game {
             hold = other.hold;
             queue = other.queue;
             garbage_meter = other.garbage_meter;
-			stats = other.stats;
+			//stats = other.stats;
         }
         return *this;
     }
@@ -47,9 +48,9 @@ class Game {
     void sonic_drop(const Board& board, Piece& piece) const;
 
     void add_garbage(int lines, int location);
-
+private:
     int damage_sent(int linesCleared, Spin Spin, bool pc);
-
+    public:
     void process_movement(Piece& piece, Movement movement) const;
 
     int get_garbage_height() const;
@@ -68,6 +69,6 @@ class Game {
     std::array<PieceType, QUEUE_SIZE> queue;
     int garbage_meter = 0;
 
-    JstrisStats stats;
+    //std::variant<Points> stats;
 
 };

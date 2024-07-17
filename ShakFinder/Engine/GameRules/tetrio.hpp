@@ -1,12 +1,13 @@
 #pragma once
 
-#include "../Constants.hpp"
+#include "tetris_points.hpp"
 
 
 enum damage_type {
     classic_guideline,
     modern_guideline
 };
+
 namespace GarbageValues {
     const int SINGLE = 0;
     const int DOUBLE = 1;
@@ -35,122 +36,135 @@ constexpr struct tetrio_settings {
     bool b2bchaining = true;
 } game_settings;
 
-struct TetrioStats {
-    // game state
-    int combo = 0;
-    int b2b = 0;
-    int currentcombopower = 0;
-    int currentbtbchainpower = 0;
-};
 
-inline int tetrio_damage(Piece_Stats params, TetrioStats& state) {
-    auto maintainsB2B = false;
-    if (params.linesCleared) {
-        state.combo++;
-        if (4 == params.linesCleared || params.spin != Spin::null) {
-            maintainsB2B = true;
-        }
+class tetrio_points : public Points {
+public:
 
-        if (maintainsB2B) {
-            state.b2b++;
+    virtual int calculate(PieceStats stats) override {
+		return tetrio_damage(stats, state);
+	}
+
+private:
+
+    struct TetrioStats {
+        // game state
+        int combo = 0;
+        int b2b = 0;
+        int currentcombopower = 0;
+        int currentbtbchainpower = 0;
+    } state;
+
+    int tetrio_damage(PieceStats params, TetrioStats& state) {
+        auto maintainsB2B = false;
+        if (params.linesCleared) {
+            state.combo++;
+            if (4 == params.linesCleared || params.spin != Spin::null) {
+                maintainsB2B = true;
+            }
+
+            if (maintainsB2B) {
+                state.b2b++;
+            }
+            else {
+                state.b2b = 0;
+            }
         }
         else {
-            state.b2b = 0;
+            state.combo = 0;
+            state.currentcombopower = 0;
         }
-    }
-    else {
-        state.combo = 0;
-        state.currentcombopower = 0;
-    }
 
-    int garbage = 0;
+        int garbage = 0;
 
-    switch (params.linesCleared) {
-    case 0:
-        if (Spin::mini == params.spin) {
-            garbage = GarbageValues::TSPIN_MINI;
-        }
-        else if (Spin::normal == params.spin) {
-            garbage = GarbageValues::TSPIN;
-        }
-        break;
-    case 1:
-        if (Spin::mini == params.spin) {
-            garbage = GarbageValues::TSPIN_MINI_SINGLE;
-        }
-        else if (Spin::normal == params.spin) {
-            garbage = GarbageValues::TSPIN_SINGLE;
-        }
-        else {
-            garbage = GarbageValues::SINGLE;
-        }
-        break;
+        switch (params.linesCleared) {
+        case 0:
+            if (Spin::mini == params.spin) {
+                garbage = GarbageValues::TSPIN_MINI;
+            }
+            else if (Spin::normal == params.spin) {
+                garbage = GarbageValues::TSPIN;
+            }
+            break;
+        case 1:
+            if (Spin::mini == params.spin) {
+                garbage = GarbageValues::TSPIN_MINI_SINGLE;
+            }
+            else if (Spin::normal == params.spin) {
+                garbage = GarbageValues::TSPIN_SINGLE;
+            }
+            else {
+                garbage = GarbageValues::SINGLE;
+            }
+            break;
 
-    case 2:
-        if (Spin::mini == params.spin) {
-            garbage = GarbageValues::TSPIN_MINI_DOUBLE;
-        }
-        else if (Spin::normal == params.spin) {
-            garbage = GarbageValues::TSPIN_DOUBLE;
-        }
-        else {
-            garbage = GarbageValues::DOUBLE;
-        }
-        break;
+        case 2:
+            if (Spin::mini == params.spin) {
+                garbage = GarbageValues::TSPIN_MINI_DOUBLE;
+            }
+            else if (Spin::normal == params.spin) {
+                garbage = GarbageValues::TSPIN_DOUBLE;
+            }
+            else {
+                garbage = GarbageValues::DOUBLE;
+            }
+            break;
 
-    case 3:
-        if (params.spin != Spin::null) {
-            garbage = GarbageValues::TSPIN_TRIPLE;
-        }
-        else {
-            garbage = GarbageValues::TRIPLE;
-        }
-        break;
+        case 3:
+            if (params.spin != Spin::null) {
+                garbage = GarbageValues::TSPIN_TRIPLE;
+            }
+            else {
+                garbage = GarbageValues::TRIPLE;
+            }
+            break;
 
-    case 4:
-        if (params.spin != Spin::null) {
-            garbage = GarbageValues::TSPIN_QUAD;
+        case 4:
+            if (params.spin != Spin::null) {
+                garbage = GarbageValues::TSPIN_QUAD;
+            }
+            else {
+                garbage = GarbageValues::QUAD;
+            }
+            break;
         }
-        else {
-            garbage = GarbageValues::QUAD;
-        }
-        break;
-    }
 
-    if (params.linesCleared) {
-        if (state.b2b > 1) {
-            if (game_settings.b2bchaining) {
-                const int b2bGarbage = (int)(GarbageValues::BACKTOBACK_BONUS * (1 + std::log1p((state.b2b - 1) * GarbageValues::BACKTOBACK_BONUS_LOG) + (state.b2b - 1 <= 1 ? 0 : (1 + std::log1p((state.b2b - 1) * GarbageValues::BACKTOBACK_BONUS_LOG) - (int)std::log1p((state.b2b - 1) * GarbageValues::BACKTOBACK_BONUS_LOG)) / 3)));
+        if (params.linesCleared) {
+            if (state.b2b > 1) {
+                if (game_settings.b2bchaining) {
+                    const int b2bGarbage = (int)(GarbageValues::BACKTOBACK_BONUS * (1 + std::log1p((state.b2b - 1) * GarbageValues::BACKTOBACK_BONUS_LOG) + (state.b2b - 1 <= 1 ? 0 : (1 + std::log1p((state.b2b - 1) * GarbageValues::BACKTOBACK_BONUS_LOG) - (int)std::log1p((state.b2b - 1) * GarbageValues::BACKTOBACK_BONUS_LOG)) / 3)));
 
-                garbage += b2bGarbage;
+                    garbage += b2bGarbage;
 
-                if (b2bGarbage > state.currentbtbchainpower) {
-                    state.currentbtbchainpower = b2bGarbage;
+                    if (b2bGarbage > state.currentbtbchainpower) {
+                        state.currentbtbchainpower = b2bGarbage;
+                    }
+                }
+                else {
+                    garbage += GarbageValues::BACKTOBACK_BONUS;
                 }
             }
             else {
-                garbage += GarbageValues::BACKTOBACK_BONUS;
+                state.currentbtbchainpower = 0;
             }
         }
-        else {
-            state.currentbtbchainpower = 0;
+
+        if (state.combo > 1) {
+            garbage *= int(1 + GarbageValues::COMBO_BONUS * (state.combo - 1));  // Fucking broken ass multiplier :)
         }
+
+        if (state.combo > 2) {
+            garbage = std::max((int)std::log1p(GarbageValues::COMBO_MINIFIER * (state.combo - 1) * GarbageValues::COMBO_MINIFIER_LOG), garbage);
+        }
+
+        const int finalGarbage = garbage * game_settings.garbagemultiplier;
+        if (state.combo > 2) {
+            state.currentcombopower = std::max(state.currentcombopower, finalGarbage);
+        }
+
+        const auto combinedGarbage = finalGarbage + (params.pc ? GarbageValues::ALL_CLEAR : 0);
+
+        return combinedGarbage;
     }
 
-    if (state.combo > 1) {
-        garbage *= int(1 + GarbageValues::COMBO_BONUS * (state.combo - 1));  // Fucking broken ass multiplier :)
-    }
 
-    if (state.combo > 2) {
-        garbage = std::max((int)std::log1p(GarbageValues::COMBO_MINIFIER * (state.combo - 1) * GarbageValues::COMBO_MINIFIER_LOG), garbage);
-    }
-
-    const int finalGarbage = garbage * game_settings.garbagemultiplier;
-    if (state.combo > 2) {
-        state.currentcombopower = std::max(state.currentcombopower, finalGarbage);
-    }
-
-    const auto combinedGarbage = finalGarbage + (params.pc ? GarbageValues::ALL_CLEAR : 0);
-
-    return combinedGarbage;
-}
+};

@@ -175,7 +175,7 @@ void Game::add_garbage(int lines, int location) {
 // ported from
 // https://github.com/emmachase/tetrio-combo
 int Game::damage_sent(int linesCleared, Spin spin, bool pc) {
-    return jstris_score({ .linesCleared = linesCleared, .spin = spin, .pc = pc }, stats);
+    return 1;//jstris_score({ .linesCleared = linesCleared, .spin = spin, .pc = pc }, stats);
 }
 
 void Game::process_movement(Piece& piece, Movement movement) const {

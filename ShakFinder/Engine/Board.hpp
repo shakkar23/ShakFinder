@@ -26,23 +26,23 @@ class Board {
     Board(Board&& other) noexcept = default;
     Board& operator=(const Board& other) = default;
 
-    constexpr int get(size_t x, size_t y) const {
+    inline constexpr int get(size_t x, size_t y) const {
         return (board[x] & (1 << y)) != 0;
     }
 
-    constexpr column_t get_column(size_t x) const {
+    inline constexpr column_t get_column(size_t x) const {
         return board[x];
     }
 
-    constexpr void set(size_t x, size_t y) {
+    inline constexpr void set(size_t x, size_t y) {
         board[x] |= (1 << y);
     }
 
-    constexpr void unset(size_t x, size_t y) {
+    inline constexpr void unset(size_t x, size_t y) {
         board[x] &= ~(1 << y);
     }
 
-    constexpr void set(const Piece& piece) {
+    inline constexpr void set(const Piece& piece) {
         for (const Coord& mino : piece.minos) {
             set(
                 (size_t)mino.x + piece.position.x,
@@ -50,7 +50,7 @@ class Board {
         }
     }
 
-    constexpr void unset(const Piece& piece) {
+    inline constexpr void unset(const Piece& piece) {
 		for (const Coord& mino : piece.minos) {
 			unset(
 				(size_t)mino.x + piece.position.x,
@@ -58,7 +58,7 @@ class Board {
 		}
 	}
 
-    constexpr int clearLines() {
+    inline constexpr int clearLines() {
         column_t mask = std::numeric_limits<column_t>::max();
         for (column_t& column : board)
             mask &= column;
@@ -71,7 +71,7 @@ class Board {
         return lines_cleared;
     }
 
-    constexpr int filledRows() const {
+    inline constexpr int filledRows() const {
         column_t mask = std::numeric_limits<column_t>::max();
         for (const column_t& column : board)
             mask &= column;
@@ -79,7 +79,7 @@ class Board {
         return std::popcount(mask);
     }
 
-    constexpr bool is_empty() const {
+    inline constexpr bool is_empty() const {
 		bool ret = true;
 		for (const column_t& column : board) {
 			if (column != 0) {
@@ -89,7 +89,7 @@ class Board {
 		return ret;
 	}
 
-    constexpr u32 bounded(int height) const {
+    inline constexpr u32 bounded(int height) const {
 		Board left_bounded = *this;
 		Board right_bounded = *this;
         
@@ -126,7 +126,7 @@ class Board {
 		return bounded_board;
     }
 
-    constexpr u32 not_empty(int height) const {
+    inline constexpr u32 not_empty(int height) const {
         column_t not_empty_board = 0;
 
 		// if the column has a value that isnt 0, then we set the bit to 1
@@ -137,7 +137,7 @@ class Board {
 		return not_empty_board;
     }
 
-    constexpr u32 full(int height) const {
+    inline constexpr u32 full(int height) const {
         u32 full_board = 0;
 
 		// if the mask is the same as the height, then the column meets the requirements
@@ -148,7 +148,7 @@ class Board {
 		return full_board;
     }
 
-    constexpr bool has_imbalanced_split(int height) const {
+    inline constexpr bool has_imbalanced_split(int height) const {
         u32 full_cols = full(height);
 
 		for (int i = 1; i < Board::width - 1; i++) {
@@ -170,7 +170,7 @@ class Board {
 		return false;
     }
 
-    constexpr u32 empty_cells(int height) const  {
+    inline constexpr u32 empty_cells(int height) const  {
         u32 acc{};
 
 		for (size_t j = 0; j < Board::width; ++j)

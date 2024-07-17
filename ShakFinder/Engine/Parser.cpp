@@ -76,12 +76,12 @@ std::vector<Queue> Parser::get_combinations(Queue queue, int num) {
 	// aka its last permutation
 	std::sort(queue.begin(), queue.end());
 	do {
-		Queue new_queue;
-		// push back the number num to the queue
-		for (int i = 0; i < num; ++i) {
-			new_queue.emplace_back(queue[i]);
-		}
-		combinations.emplace_back(std::move(new_queue));
+		std::vector new_queue = std::vector(queue.begin(), queue.begin() + num);
+		auto it = std::find(combinations.begin(), combinations.end(), new_queue);
+		
+		// if the combination is not in the vector then add it
+		if (it == combinations.end())
+			combinations.emplace_back(queue.begin(), queue.begin() + num);
 	} while (std::next_permutation(queue.begin(), queue.end()));
 
 	return combinations;
@@ -145,11 +145,12 @@ std::vector< std::vector<PieceType>> Parser::parse(const std::string& str) {
 			// make a copy of all the queues, and make a cartesian product of the queues, and the bag
 			std::vector<Queue> old_pieces = std::move(pieces);
 
-			for (const auto& comb : combs) {
-				for (const auto& queue : old_pieces) {
-					Queue new_queue = queue;
-					new_queue.insert(new_queue.end(), comb.begin(), comb.end());
-					pieces.emplace_back(std::move(new_queue));
+			pieces.clear();
+			for (auto& old_piece : old_pieces) {
+				for (auto& comb : combs) {
+					auto new_piece = old_piece;
+					new_piece.insert(new_piece.end(), comb.begin(), comb.end());
+					pieces.push_back(new_piece);
 				}
 			}
 

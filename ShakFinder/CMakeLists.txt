@@ -14,4 +14,4 @@ set(SHAKFINDER_SOURCES
 add_executable (ShakFinder ${SHAKFINDER_SOURCES})
 
 # set to 23 when available
-set_property(TARGET ShakFinder PROPERTY CXX_STANDARD 20)
+set_property(TARGET ShakFinder PROPERTY CXX_STANDARD 23)

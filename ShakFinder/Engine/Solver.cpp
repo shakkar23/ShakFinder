@@ -42,7 +42,7 @@ static bool can_pc_recurse(const can_pc_state& state, std::atomic_bool& solved) 
         u32 empty_cells = game.board.empty_cells(state.max_lines - state.cleared_lines);
         // this only works because we constrain the queue to be
         // exactly the number of pieces that fills the max_pc
-        size_t lookahead = empty_cells / 4;
+        const size_t lookahead = empty_cells / 4;
 
         int t_count = 0;
         for (size_t i = 0; i < lookahead; i++) {
@@ -262,9 +262,12 @@ static void solve_pcs_recurse(const solve_pcs_state& state) {
 
     Game game = state.game;
 
+    // copy the current piece
+    game.current_piece = state.queue[state.pieces_used];
+
     // copy the queue
-    for (size_t i = 0; i < QUEUE_SIZE && i + state.pieces_used < state.queue.size(); i++) {
-        game.queue[i] = state.queue[i + state.pieces_used];
+    for (size_t i = 0; i < QUEUE_SIZE && i + state.pieces_used + 1 < state.queue.size(); i++) {
+        game.queue[i] = state.queue[i + state.pieces_used + 1];
     }
 
     // possible piece placements
@@ -278,7 +281,7 @@ static void solve_pcs_recurse(const solve_pcs_state& state) {
         u32 empty_cells = game.board.empty_cells(state.max_lines - state.cleared_lines);
         // this only works because we constrain the queue to be
         // exactly the number of pieces that fills the max_pc
-        size_t lookahead = empty_cells / 4;
+        const size_t lookahead = empty_cells / 4;
 
         int t_count = 0;
         for (size_t i = 0; i < lookahead; i++) {
@@ -316,7 +319,6 @@ static void solve_pcs_recurse(const solve_pcs_state& state) {
                 return;
         } else if (t_count == 1) {
             // if we have a single T piece, we need to make sure this T piece is vertical to account for the columnar parity
-
             if (columnar_parity % 2 == 1)
                 T_should_be_vertical = true;
             else
@@ -344,7 +346,6 @@ static void solve_pcs_recurse(const solve_pcs_state& state) {
         for (auto& mino : pp.minos) {
             if (pp.position.y + mino.y >= (state.max_lines - state.cleared_lines)) {
                 valid = false;
-                break;
             }
         }
 
@@ -441,9 +442,12 @@ std::vector<std::vector<Piece>> solve_pcs(const Board& board, const Queue& queue
     Game game;
     game.current_piece = queue[0];
 
-    for (size_t i = 1; i < (QUEUE_SIZE + 1) && i < queue.size(); i++) {
-        game.queue[i - 1] = queue[i];
+    for (size_t i = 0; i < QUEUE_SIZE && i + 1 < queue.size(); i++) {
+        game.queue[i] = queue[i+1];
     }
+
+    game.board = board;
+
     std::vector<Piece> ppp = game.get_possible_piece_placements();
     int max_lines = 4;
 
@@ -456,15 +460,30 @@ std::vector<std::vector<Piece>> solve_pcs(const Board& board, const Queue& queue
     for (auto& pp : ppp) {
         threads[i] = std::jthread([game, queue, pp, &solved, max_lines, &return_value = return_values[i]]() {
             Game new_game = game;
+
+            // make sure the piece is valid
+            bool valid = true;
+            for (auto& mino : pp.minos) {
+                if (pp.position.y + mino.y >= (max_lines - 0)) { // 0 => cleared lines
+                    valid = false;
+                }
+            }
+
+            if (!valid) {
+                return;
+            }
+
             bool held_first = new_game.place_piece(pp);
             int lines_cleared = new_game.board.clearLines();
+
+
 
             if (lines_cleared == max_lines) {
                 solved = true;
                 return_value = {{pp}};
                 return;
             }
-            int pieces_used = 0;
+            int pieces_used = 1;
 
             if (held_first) {
                 pieces_used++;
