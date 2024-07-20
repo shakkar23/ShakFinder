@@ -277,17 +277,21 @@ static void solve_pcs_recurse(const solve_pcs_state& state) {
     game.current_piece = state.queue[state.pieces_used];
 
     // copy the queue
-    for (size_t i = 0; i < QUEUE_SIZE && i + state.pieces_used + 1 < state.queue.size(); i++) {
+    for (size_t i = 0;  i < QUEUE_SIZE   &&    i + state.pieces_used + 1 < state.queue.size(); i++) {
         game.queue[i] = state.queue[i + state.pieces_used + 1];
     }
 
     // possible piece placements
     std::vector<Piece> ppp = game.get_possible_piece_placements();
 
+    // columnar state to check for if the T piece should be placed in a certain orientation
     bool T_should_be_vertical = false;
     bool T_should_be_horizontal = false;
 
-    // columnar parity checking
+    // columnar parity checking this is mega nerd stuff
+    // https://docs.google.com/document/d/1udtq235q2SdoFYwMZNu-GRYR-4dCYMkp0E8_Hw1XTyg/edit#heading=h.z6ne0og04bp5
+    // this is the link to the document that explains Perfect Clear Theory
+    // i dont understand much of this apparently it just works
     {  
         u32 empty_cells = game.board.empty_cells(state.max_lines - state.cleared_lines);
         // this only works because we constrain the queue to be
@@ -336,12 +340,13 @@ static void solve_pcs_recurse(const solve_pcs_state& state) {
                 T_should_be_horizontal = true;
         }
 
-    }  // columnar parity
+    }  // columnar parity 
 
     for (auto& pp : ppp) {
-        // make object that does pop back on destruction
+        // object that I can just make that does the pop and push for recursive calls to have the correct path
         struct path_updater {
             std::vector<Piece>& path;
+
             path_updater(std::vector<Piece>& path, const Piece& pp) : path(path) {
                 path.emplace_back(pp);
             }
@@ -403,6 +408,7 @@ static void solve_pcs_recurse(const solve_pcs_state& state) {
         int lines_left = state.max_lines - state.cleared_lines - lines_cleared;
 
         {
+            // bit maggic stuff, dont ask me it just works apparently
             // has_isolated_cell https://github.com/wirelyre/tetra-tools/blob/2342953cb424cfd5ca94fa8eefdbe5434bd5ff1c/srs-4l/src/gameplay.rs#L169
             u32 not_empty = new_game.board.not_empty(lines_left);
             u32 full = new_game.board.full(lines_left);
@@ -413,6 +419,8 @@ static void solve_pcs_recurse(const solve_pcs_state& state) {
             }
         }
 
+        // https://github.com/wirelyre/tetra-tools/blob/2342953cb424cfd5ca94fa8eefdbe5434bd5ff1c/srs-4l/src/gameplay.rs#L240
+        // this also just works
         if (new_game.board.has_imbalanced_split(lines_left))
         {
             // bad piece placement, it makes an imbalanced split
@@ -444,7 +452,7 @@ static void solve_pcs_recurse(const solve_pcs_state& state) {
              .cleared_lines = state.cleared_lines + lines_cleared,
              .max_lines = state.max_lines});
     }
-    return;
+
 }
 // returns the Moves for every PC possible
 std::vector<std::vector<Piece>> solve_pcs(const Board& board, const Queue& queue) {
@@ -453,7 +461,7 @@ std::vector<std::vector<Piece>> solve_pcs(const Board& board, const Queue& queue
     Game game;
     game.current_piece = queue[0];
 
-    for (size_t i = 0; i < QUEUE_SIZE && i + 1 < queue.size(); i++) {
+    for (size_t i = 0;  i < QUEUE_SIZE  &&  i + 1 < queue.size(); i++) {
         game.queue[i] = queue[i+1];
     }
 
