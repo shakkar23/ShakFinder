@@ -7,7 +7,7 @@ set(SHAKFINDER_SOURCES
 	"ShakFinder.cpp"
 	"Engine/Game.cpp"
 	"Engine/Piece.cpp"
- "Engine/Parser.cpp" "Engine/Solver.cpp" )
+ "Solver/Parser.cpp" "Solver/Solver.cpp" )
 
  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
 
