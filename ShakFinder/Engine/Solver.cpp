@@ -200,6 +200,17 @@ bool can_pc(const Board& board, const Queue& queue) {
             bool first_hold = new_game.place_piece(p);
             int lines_cleared = new_game.board.clearLines();
 
+            // make sure the piece is valid
+            bool valid = true;
+            for (auto& mino : pp.minos) {
+                if (pp.position.y + mino.y >= (max_lines - 0)) { // 0 => cleared lines
+                    valid = false;
+                }
+            }
+
+            if (!valid)
+                return;
+
             if (lines_cleared == max_lines) {
                 atomic_solved = true;
                 return_value = true;
