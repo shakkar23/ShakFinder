@@ -1,0 +1,3 @@
+[submodule "ShakFinder/ShakTrisLib"]
+	path = ShakFinder/ShakTrisLib
+	url = https://github.com/shakkar23/ShakTrisLib
