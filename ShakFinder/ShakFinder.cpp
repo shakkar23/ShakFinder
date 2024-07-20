@@ -14,9 +14,10 @@ int main(int argc,const char* argv[]) {
 
     vargs = {
         "ShakFinder",
-        "v115@9gD8DeF8CeG8BeH8CeC8JeAgH",
-        "paths",
-        "*p1*p1*p1*p1"
+        "v115@vhAAgH", // empty 
+        // "v115@9gD8DeF8CeG8BeH8CeC8JeAgH", // pco opener
+        "percents",
+        "OSJILTZ*p4"
     };
 
     if (vargs.size() < 4) {
@@ -111,5 +112,6 @@ int main(int argc,const char* argv[]) {
     auto end = std::chrono::steady_clock::now();
 
     std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "[milliseconds]" << std::endl;
+
     return 0;
 }
