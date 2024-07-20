@@ -2,9 +2,9 @@
 
 #include <chrono>
 
-#include "Engine/Parser.hpp"
-#include "Engine/Solver.hpp"
-#include "Engine/Fumen.hpp"
+#include "Solver/Parser.hpp"
+#include "Solver/Solver.hpp"
+#include "Solver/Fumen.hpp"
 
 int main(int argc,const char* argv[]) {
     std::span<const char*> args(argv, argc);
@@ -111,7 +111,7 @@ int main(int argc,const char* argv[]) {
 
     auto end = std::chrono::steady_clock::now();
 
-    std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "[milliseconds]" << std::endl;
+    std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count() / 1e9 << "[seconds]" << std::endl;
 
     return 0;
 }

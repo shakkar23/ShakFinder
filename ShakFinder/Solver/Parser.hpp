@@ -1,9 +1,11 @@
 #pragma once
-#include "Piece.hpp"
+#include "engine/Piece.hpp"
 #include <string>
 #include <vector>
 #include <algorithm>
 #include <iostream>
+
+#include "Util.hpp"
 
 namespace Parser {
 	PieceType getType(char c);

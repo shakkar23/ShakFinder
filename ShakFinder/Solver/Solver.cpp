@@ -3,7 +3,7 @@
 #include <atomic>
 #include <thread>
 
-#include "Game.hpp"
+#include "engine/Game.hpp"
 
 namespace Solver {
 
@@ -51,7 +51,7 @@ static bool can_pc_recurse(const can_pc_state& state, std::atomic_bool& solved) 
             }
         }
 
-        if (game.hold.has_value() && game.hold.value().type == PieceType::T)
+        if (game.hold.has_value() && game.hold.value() == PieceType::T)
             t_count++;
 
         if (game.current_piece.type == PieceType::T)
@@ -301,7 +301,7 @@ static void solve_pcs_recurse(const solve_pcs_state& state) {
             }
         }
 
-        if (game.hold.has_value() && game.hold.value().type == PieceType::T)
+        if (game.hold.has_value() && game.hold.value() == PieceType::T)
             t_count++;
 
         if (game.current_piece.type == PieceType::T)

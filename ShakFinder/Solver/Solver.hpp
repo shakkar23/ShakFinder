@@ -2,9 +2,10 @@
 
 #include <vector>
 
-#include "Board.hpp"
-#include "Piece.hpp"
+#include "engine/Board.hpp"
+#include "engine/Piece.hpp"
 
+#include "Util.hpp"
 namespace Solver {
 
 // returns whether or not a pc is possible

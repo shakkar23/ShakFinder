@@ -1,5 +1,7 @@
 #pragma once
-#include "Board.hpp"
+#include "engine/Board.hpp"
+#include "engine/Piece.hpp"
+#include "engine/TetrisConstants.hpp"
 
 #include <vector>
 #include <array>
@@ -9,7 +11,7 @@
 #include <string>
 #include <ranges>
 
-
+using s8 = int8_t;
 namespace Fumen {
 
 	const constexpr std::array<u8, 64> BASE64_CHARS = {
@@ -327,7 +329,8 @@ namespace Fumen {
 								}
 							}
 
-							page.piece = Piece(type, { x,y }, rot);
+							page.piece = Piece(type, rot);
+							page.piece.value().position = { x,y };
 						}
 
 						int flags = number / 32 / 240;
