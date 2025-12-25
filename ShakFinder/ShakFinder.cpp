@@ -1,6 +1,7 @@
 ﻿#include "ShakFinder.h"
 
 #include <chrono>
+#include <cstring>
 
 #include "Solver/Parser.hpp"
 #include "Solver/Solver.hpp"
@@ -11,14 +12,14 @@ int main(int argc,const char* argv[]) {
 	
     std::vector vargs = std::vector(args.begin(), args.end());
 
-
-    vargs = {
-        "ShakFinder",
-        "v115@vhAAgH", // empty 
-        // "v115@9gD8DeF8CeG8BeH8CeC8JeAgH", // pco opener
-        "percents",
-        "OSJILTZ*p4"
-    };
+    if(vargs.size() < 4)
+        vargs = {
+            "ShakFinder",
+            //"v115@vhAAgH", // empty 
+            "v115@9gD8DeF8CeG8BeH8CeC8JeAgH", // pco opener
+            "percents",
+            "zstt"
+        };
 
     if (vargs.size() < 4) {
         std::cout << "Usage: ./" << args[0] << " <fumen> <paths|percents> <queue>" << std::endl;
@@ -33,7 +34,7 @@ int main(int argc,const char* argv[]) {
     }
     //fumen.value().pages[0].print_field();
 
-    Board board = Fumen::to_board(fumen.value().pages[0].field);
+    auto board = Fumen::to_board(fumen.value().pages[0].field);
 
     auto begin = std::chrono::steady_clock::now();
 
@@ -91,7 +92,7 @@ int main(int argc,const char* argv[]) {
                         std::cout << "the path is " << path.size() << " long: " << std::endl;
 
                         for (const auto& piece : path) {
-                            std::cout << "\t" << Parser::getChar(piece.type) << ": x=" << int(piece.position.x) << " y=" << int(piece.position.y) << std::endl;
+                            std::cout << "\t" << Parser::getChar(piece.type) << ": x=" << int(piece.x) << " y=" << int(piece.y) << std::endl;
                         }
                         std::cout << std::endl;
                     }

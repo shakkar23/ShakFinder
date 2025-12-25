@@ -1,5 +1,4 @@
 #pragma once
-#include "engine/Piece.hpp"
 #include <string>
 #include <vector>
 #include <algorithm>

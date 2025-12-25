@@ -95,7 +95,7 @@ The input [SZLJ]p2 represents twelve possible piece queues
 SZ, SL, SJ, ZS, ZL, ZJ, LS, LZ, LJ, JS, JZ, JL.
 The input *! is equivalent to [TILJSZO]p7 and represents 5040 piece queues
 */
-std::vector< std::vector<PieceType>> Parser::parse(const std::string& str) {
+std::vector<std::vector<PieceType>> Parser::parse(const std::string& str) {
 	std::vector<Queue> pieces;
 	pieces.push_back({});
 

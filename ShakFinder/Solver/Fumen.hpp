@@ -1,7 +1,4 @@
 #pragma once
-#include "engine/Board.hpp"
-#include "engine/Piece.hpp"
-#include "engine/TetrisConstants.hpp"
 
 #include <vector>
 #include <array>
@@ -11,7 +8,10 @@
 #include <string>
 #include <ranges>
 
+#include "Util.hpp"
+
 using s8 = int8_t;
+using u8 = uint8_t;
 namespace Fumen {
 
 	const constexpr std::array<u8, 64> BASE64_CHARS = {
@@ -61,7 +61,7 @@ namespace Fumen {
 	using DeltaBoard = std::array<std::array<u8, 10>, 24>;
 
 	struct Page {
-		std::optional<Piece> piece;
+		std::optional<FullPiece> piece;
 		FumenBoard field;
 		std::array<CellColor, 10> garbage_row;
 		bool rise = false;
@@ -235,7 +235,7 @@ namespace Fumen {
 						const unsigned int piece_pos = number / 32 % 240;
 
 						if (piece_type == 0) {
-							page.piece = Piece(PieceType::Empty);
+							page.piece = FullPiece(PieceType::Empty);
 						}
 						else {
 							PieceType type;
@@ -263,7 +263,7 @@ namespace Fumen {
 								break;
 							}
 
-							RotationDirection rot;
+							int rot;
 							switch (piece_rotation) {
 							case 0:
 								rot = RotationDirection::North;
@@ -329,8 +329,7 @@ namespace Fumen {
 								}
 							}
 
-							page.piece = Piece(type, rot);
-							page.piece.value().position = { x,y };
+							page.piece = FullPiece(type, x,y, rot);
 						}
 
 						int flags = number / 32 / 240;
