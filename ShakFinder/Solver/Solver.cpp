@@ -74,8 +74,8 @@ namespace Solver {
                 // count the number of J and L pieces used and left in the queue
                 // as well as the number of vertical Ts in the path
                 // if the sum of these is odd, we have an invalid columnar parity
-                if (columnar_parity % 2 == 1)
-                    return false;
+                if (columnar_parity % 2 == 1);
+                    //return false;
             } else if (t_count == 1) {
                 // if we have a single T piece, we need to make sure this T piece is vertical to account for the columnar parity
 
@@ -110,13 +110,13 @@ namespace Solver {
                                 Board new_board = game.board;
                                 bool valid = true;
                                 reachability::static_for<B.BLOCK_PER_MINO>([&](const std::size_t mino_i) {
-                                    int px = x + (B.minos[B.mino_index[rot]][mino_i][0]) + B.mino_offset[rot][0];
-                                    int py = y + (B.minos[B.mino_index[rot]][mino_i][1]) + B.mino_offset[rot][1];
+                                    int px = x + (B.minos[B.mino_index[rot]][mino_i][0]);
+                                    int py = y + (B.minos[B.mino_index[rot]][mino_i][1]);
                                     // new_board.set(px, py);
 
                                     valid &= (py < (state.max_lines - state.cleared_lines));
                                 });
-                                if(x==6 and y==2 and block_type == PieceType::S and rot == RotationDirection::North) {
+                                if(x==5 and y==2 and block_type == PieceType::T and rot == RotationDirection::East) {
                                     //std::println("{}", valid);
                                 }
                                 if (!valid) {
@@ -239,7 +239,7 @@ namespace Solver {
         }
 
         std::vector<std::jthread> threads(size_acc);
-        std::vector<u8> return_values(size_acc);
+        std::vector<u8> return_values(size_acc, 0);
         //std::println("{}", size_acc);
 
         int i = 0;
@@ -251,8 +251,16 @@ namespace Solver {
                     reachability::static_for<Board::height>([&] (auto y) {
                         reachability::static_for<Board::width>([&] (auto x) {
                             if (reachable_board.template get<x,y>()) {
+
                                 #ifdef MULTITHREADED
                                 threads[i] = std::jthread(
+                                #else
+
+                                bool already_solved = false;
+                                for (auto return_value : return_values) {
+                                    already_solved |= return_value;
+                                }
+                                if(already_solved) return;
                                 #endif
                                 [block_type=block_type,held=held,rot=rot,x=x,y=y,game, queue, &atomic_solved, max_lines, &return_value = return_values[i]]() {
                                     Game new_game = game;
@@ -263,13 +271,13 @@ namespace Solver {
                                     // make sure the piece is valid
                                     bool valid = true;
                                     reachability::static_for<B.BLOCK_PER_MINO>([&](const std::size_t mino_i) {
-                                        int px = x + (B.minos[B.mino_index[rot]][mino_i][0]) + B.mino_offset[rot][0];
-                                        int py = y + (B.minos[B.mino_index[rot]][mino_i][1]) + B.mino_offset[rot][1];
+                                        int px = x + (B.minos[B.mino_index[rot]][mino_i][0]);
+                                        int py = y + (B.minos[B.mino_index[rot]][mino_i][1]);
                                         valid &= (py < (max_lines - 0)); // 0 => cleared lines
                                     });
                                     
-                                    if(x==4 and y==1 and block_type == PieceType::T and rot == RotationDirection::East) {
-                                        // std::println("{}", valid);
+                                    if(x==5 and y==2 and block_type == PieceType::T and rot == RotationDirection::East) {
+                                        //std::println("{}", valid);
                                     }
 
                                     if (!valid)

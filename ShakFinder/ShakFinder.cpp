@@ -18,7 +18,7 @@ int main(int argc,const char* argv[]) {
             //"v115@vhAAgH", // empty 
             "v115@9gD8DeF8CeG8BeH8CeC8JeAgH", // pco opener
             "percents",
-            "zstt"
+            "TTIS"
         };
 
     if (vargs.size() < 4) {
@@ -47,24 +47,20 @@ int main(int argc,const char* argv[]) {
 			bool solved = Solver::can_pc(board, queues[i]);
         
 			if (!solved) {
-				std::cout << "we could not solve the pc for: " << (i + 1) << std::endl;
-				std::cout << "the queue is: ";
+				std::cout << "unsolvable: ";
 				for (const PieceType& piece : queues[i]) {
 					std::cout << Parser::getChar(piece);
 				}
-				std::cout << std::endl
-					<< std::endl;
+				std::cout << std::endl;
 			}
 			else {
                 total_solved++;
-				std::cout << "solved a thing!" << std::endl;
-				std::cout << "the queue is: ";
+				std::cout << "solved: ";
 				for (const PieceType& piece : queues[i]) {
 					std::cout << Parser::getChar(piece);
 				}
 
-				std::cout << std::endl
-					<< std::endl;
+				std::cout << std::endl;
 			}
         }
     

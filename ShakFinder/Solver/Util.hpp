@@ -88,8 +88,8 @@ struct Game {
     void place_this_piece(FullPiece piece) {
         reachability::blocks::call_with_block<reachability::blocks::SRS>(piece.type, [&]<reachability::block B>(){
             reachability::static_for<B.BLOCK_PER_MINO>([&](const std::size_t mino_i) {
-                int px = piece.x + (B.minos[B.mino_index[piece.r]][mino_i][0]) + B.mino_offset[piece.r][0];
-                int py = piece.y + (B.minos[B.mino_index[piece.r]][mino_i][1]) + B.mino_offset[piece.r][1];
+                int px = piece.x + (B.minos[B.mino_index[piece.r]][mino_i][0]);
+                int py = piece.y + (B.minos[B.mino_index[piece.r]][mino_i][1]);
                 board.set(px, py);
             });
         });
